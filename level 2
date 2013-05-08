@@ -1,0 +1,266 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title> shery_heba game </title>
+<style>
+body {
+margin-left: 25%;
+margin-right:25%;
+padding: 0;
+background:url('hd-space-hd-wallpaper.jpg') no-repeat center;
+background-color: #000000;
+}
+#Pause{
+float:left;
+margin-left:-20%;
+}
+</style>
+<script src="pixi.js"></script>
+<script src="../../src/pixi/renderers/WebGLRenderer.js"></script>
+</head>
+<body>
+<div id="Pause">
+<img src="pause_sm.png" alt="Smiley face" height="42" width="42" onclick="Pause();">
+<img id="image" src="music_sm.png" alt="Smiley face" height="42" width="42" onclick="MuteMusic();">
+</div>
+<img id="start" src="Level2Logo.gif" alt="Smiley face" style="margin-left:13%;position:fixed;margin-top:8%;" onclick="Game(50,800,10);">
+<label id="Score" title="0" style="position:fixed;color:white;font-size:30px;visibility:hidden;margin-left:25%;"></label>
+<audio id="audiotag1" src="Game Over Super Mario Bros.mp3" preload="auto"></audio>
+<audio id="audiotag" src="Laser Gun (Star Wars).wav" preload="auto"></audio>
+<script>
+var flag_Move = true;
+var Music = 1;
+var Running = 1;
+function Pause(){
+if(Running == 1){
+flag_Move = false;
+Running = 0 ;
+}else{
+flag_Move = true;
+Running = 1;
+}
+}
+function MuteMusic(){
+if(Music == 1){
+document.getElementById('audiotag1').pause();
+Music = 0;
+document.getElementById("image").src="musicmute_sm.png";
+}
+else{
+document.getElementById('audiotag1').play();
+Music = 1;
+document.getElementById("image").src="music_sm.png";
+}
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function Game(){
+document.getElementById('audiotag1').play();
+document.getElementById('Score').style.visibility="visible";
+document.getElementById('Score').innerHTML="score : 0";
+document.getElementById('start').style.visibility="hidden";
+//document.addEventListener('DOMContentLoaded', killing, false);
+var assetsToLoader = [ "SpriteSheet.json"];
+// create a new loader
+loader = new PIXI.AssetLoader(assetsToLoader);
+// use callback
+loader.onComplete = onAssetsLoaded
+//begin load
+loader.load();
+//global varibles
+var Score = 0;
+var Lifes = 3;
+var w = 600;
+var h = 700;
+var background = [];
+var shotCount = 0;
+var shoots = [];
+var shoots1 = [];
+var stage = new PIXI.Stage(0x000000,true);
+// create a renderer instance
+var renderer = PIXI.autoDetectRenderer(600, 700);
+// add the renderer view element to the DOM
+document.body.appendChild(renderer.view);
+//import image
+var bg1=PIXI.Sprite.fromImage("level2.png");
+var bg2=PIXI.Sprite.fromImage("level2.png");
+var bg3=PIXI.Sprite.fromImage("level2.png");
+var texture = PIXI.Texture.fromImage("spaceship.png");
+var spaceship = new PIXI.Sprite(texture);
+spaceship.setInteractive(true);
+//positions
+spaceship.anchor.x = 0.5;
+spaceship.anchor.y = 0.5;
+// move the sprite t the center of the screen
+spaceship.position.x = 300;
+spaceship.position.y = 500;
+//add to stage
+stage.addChild(bg1);
+stage.addChild(bg2);
+stage.addChild(bg3);
+stage.addChild(spaceship);
+//fn.
+spaceship.mouseover = function(spaceship){
+this.isOver = true;
+}
+spaceship.mouseout = function(spaceship){
+this.isOver = true;
+}
+spaceship.mousemove=spaceship.touchmove=spaceship.mouseover=function(spaceship)
+{
+if((this.isOver==true)&&(flag_Move==true))
+{
+// need to get parent coords..
+var newPosition =spaceship.getLocalPosition(this.parent);
+this.position.x = newPosition.x;
+this.position.y = newPosition.y;
+npsx=newPosition.x;
+npsy=newPosition.y;
+}
+}
+spaceship.click=spaceship.tap = function(spaceship){
+document.getElementById('audiotag').play();
+shoot=PIXI.Sprite.fromImage("shooting.png");  
+shoot1=PIXI.Sprite.fromImage("shooting.png");
+// click!	
+shoot.position.x=this.position.x;
+shoot.position.y=this.position.y;
+shoot.anchor.x=0.5+0.6;
+shoot.anchor.y=0.7;
+shoot1.position.x=this.position.x;
+shoot1.position.y=this.position.y;
+shoot1.anchor.x=0.5+0.6-1.2;
+shoot1.anchor.y=0.7;
+shoots.push(shoot);
+shotCount++;
+shoots1.push(shoot1);
+stage.addChild(shoot);
+stage.addChild(shoot1);
+}
+//////////////////////////////////////////////////////////
+var Life = PIXI.Texture.fromImage("life.png");
+var Life1 = new PIXI.Sprite(Life);
+var Life2 = new PIXI.Sprite(Life);
+var Life3 = new PIXI.Sprite(Life);
+Life1.position.x = 550;
+Life1.position.y = 10;
+Life2.position.x = 550;
+Life2.position.y = 50;
+Life3.position.x = 550;
+Life3.position.y = 90;
+stage.addChild(Life1);
+stage.addChild(Life2);
+stage.addChild(Life3);
+//////////////////////////////////////////////////
+var GameOver = PIXI.Sprite.fromImage("invaders_gameover.jpg");
+GameOver.position.x=100;
+GameOver.position.y=100;
+//////////////////////////////////////////////////
+setInterval(create_enemies,1000);
+var enemies = [];
+var tempBall;
+var ballTexture = new PIXI.Texture.fromImage("ActionAssets%20(1).png");
+function create_enemies() {
+tempBall = new PIXI.Sprite(ballTexture);
+tempBall.setInteractive(true);
+tempBall.position.x = Math.random()*w;
+tempBall.position.y =-200 ;
+tempBall.anchor.x = 0.5;
+tempBall.anchor.y = 0.5;
+enemies.push(tempBall);
+stage.addChild(tempBall);
+}
+////////////////////////////////////////////
+function onAssetsLoaded()
+{
+requestAnimFrame( animate );	
+}
+for(var i = 0 ; i<enemies.length; i++){
+enemies[i].position.y +=9;
+}
+function animate() {
+requestAnimFrame( animate )
+if(flag_Move==true){
+bg1.position.y=bg1.position.y+5;	
+if(bg3.position.y==0){
+bg1.position.y=-790;;
+}
+if(bg1.position.y==0){
+bg2.position.y=-800;
+}
+bg2.position.y=bg2.position.y+5;
+if(bg2.position.y==0){
+bg3.position.y=-800;
+}
+bg3.position.y=bg3.position.y+5;}
+///////////////////////////////////////////////
+for(var i = 0 ; i<enemies.length; i++){
+if(flag_Move==true){
+enemies[i].position.y +=9;
+}}
+///////////////////////////////////////////////
+for(var i = 0 ; i<shoots.length; i++){
+if(flag_Move==true){
+shoots[i].position.y=shoots[i].position.y-4; 
+shoots1[i].position.y=shoots1[i].position.y-4;
+}}
+renderer.render(stage);
+}
+////////////////////////////////////////////
+function collision_en_shot()
+{
+for(var i=0;i<shoots.length;i++)
+{
+var b=shoots[i];
+for(var j=0;j<enemies.length;j++)
+{
+var a=enemies[j];
+if((b.position.x < (a.position.x + a.width)) && ((b.position.x + b.width) > a.position.x) &&
+(b.position.y < (a.position.y + a.height)) &&
+((b.position.y + b.height) > a.position.y))
+{
+stage.removeChild(shoots[i]);
+stage.removeChild(shoots1[i]);
+stage.removeChild(enemies[j]);
+enemies.splice(j,1);
+shoots.splice(i,1);
+shoots1.splice(i,1);
+document.getElementById('Score').innerHTML="Score : "+Score;
+Score +=1;
+}
+}
+}
+}
+setInterval(collision_en_shot,10);
+/////////////////////////////////////////////////
+function collision_en_spaceship(){
+for(var j=0;j<enemies.length;j++){
+var a=enemies[j];
+a.mouseover = function(a){
+this.isOver = true;
+if(spaceship.isOver==this.isOver){
+if(Lifes == 3){
+stage.removeChild(Life3);
+}else if(Lifes == 2){
+stage.removeChild(Life2);
+}
+else if(Lifes == 1){
+stage.removeChild(Life1);
+stage.removeChild(spaceship);
+stage.addChild(GameOver);
+MuteMusic();
+}
+Lifes --
+}
+}
+a.mouseout = function(a){
+this.isOver = true;
+}
+}
+}
+setInterval(collision_en_spaceship,10);
+}
+</script>
+<script>
+</script>
+</body>
+</html>
